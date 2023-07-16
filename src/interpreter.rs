@@ -46,7 +46,7 @@ pub struct Interpreter {
 #[derive(Clone)]
 enum FuncBody {
     AstBody(AST),
-    ClosureBody(Box<&'static dyn Fn(Vec<Object>) -> Object>),
+    ClosureBody(&'static dyn Fn(Vec<Object>) -> Object),
 }
 
 impl Interpreter {
@@ -58,11 +58,11 @@ impl Interpreter {
         let functions = vec![
             (
                 "println".to_string(),
-                FuncBody::ClosureBody(Box::new(&|args: Vec<Object>| stdlib::println(args))),
+                FuncBody::ClosureBody(&|args: Vec<Object>| stdlib::println(args)),
             ),
             (
                 "print".to_string(),
-                FuncBody::ClosureBody(Box::new(&|args: Vec<Object>| stdlib::print(args))),
+                FuncBody::ClosureBody(&|args: Vec<Object>| stdlib::print(args)),
             ),
         ];
 
