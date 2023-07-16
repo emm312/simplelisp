@@ -4,7 +4,7 @@ use simplelisp::{ast::parse, interpreter::Interpreter};
 #[derive(Parser)]
 struct Args {
     #[arg()]
-    input_file: String
+    input_file: String,
 }
 
 fn main() {

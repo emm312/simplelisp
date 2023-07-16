@@ -15,7 +15,7 @@ pub enum AST {
     ArrayAssign(String, Expr, Expr),
     Return(Expr),
     ReturnVoid,
-    If(Expr, Vec<AST>)
+    If(Expr, Vec<AST>),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -24,7 +24,7 @@ pub enum Expr {
     Var(String),
     Literal(Object),
     FuncCall(String, Vec<Expr>),
-    ArrayAccess(Box<Expr>, Box<Expr>)
+    ArrayAccess(Box<Expr>, Box<Expr>),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
@@ -37,14 +37,14 @@ pub enum BinOp {
     Lt,
     Eq,
     Neq,
-    Mod
+    Mod,
 }
 
 pub fn parse(code: &str) -> Vec<AST> {
     match grammar::SimpleLispParser::new().parse(code) {
         Ok(ast) => ast,
         Err(e) => {
-            println!("{}", e);
+            crate::printing::print(format!("{}", e));
             exit(-1);
         }
     }

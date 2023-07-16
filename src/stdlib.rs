@@ -1,24 +1,30 @@
-use crate::object::Object;
+use crate::{object::Object, printing};
 
 pub fn print_fmt(objs: Vec<Object>, debug: bool) {
     for arg in objs {
         match arg {
-            Object::Integer(n) => print!("{n}"),
-            Object::String(n) => if debug { print!("\"{n}\"") } else { print!("{}", n) },
-            Object::Float(n) => print!("{n}"),
+            Object::Integer(n) => printing::print(format!("{n}")),
+            Object::String(n) => {
+                if debug {
+                    printing::print(format!("\"{n}\""))
+                } else {
+                    printing::print(format!("{n}"))
+                }
+            }
+            Object::Float(n) => printing::print(format!("{n}")),
             Object::WalkedList(n) => {
-                print!("[");
+                printing::print("[".to_string());
                 for (pos, obj) in n.iter().enumerate() {
-                    if pos == n.len()-1 {
+                    if pos == n.len() - 1 {
                         print_fmt(vec![obj.clone()], true);
                     } else {
                         print_fmt(vec![obj.clone()], true);
-                        print!(", ");
+                        printing::print(", ".to_string());
                     }
                 }
-                print!("]");
-            },
-            _ => print!("{:?}", arg),
+                printing::print("]".to_string());
+            }
+            _ => printing::print(format!("{:?}", arg)),
         }
     }
 }
@@ -31,6 +37,6 @@ pub fn print(objs: Vec<Object>) -> Object {
 
 pub fn println(objs: Vec<Object>) -> Object {
     print(objs);
-    println!();
+    printing::println(String::default());
     Object::Void
 }

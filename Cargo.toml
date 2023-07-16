@@ -7,11 +7,19 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.3.12", features = ["derive"] }
+console_error_panic_hook = "0.1.7"
 lalrpop-util = { version="0.20.0", features=["lexer"] }
 regex = "1.7.9"
+wasm-bindgen = { version="0.2.87", optional=true }
 
 [build-dependencies]
 lalrpop = "0.20.0"
 
 [profile.release]
 lto = true
+
+[features]
+wasm = ["dep:wasm-bindgen"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
