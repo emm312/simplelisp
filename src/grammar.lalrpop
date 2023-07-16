@@ -1,0 +1,55 @@
+use crate::ast::*;
+use crate::object::*;
+
+grammar;
+
+pub SimpleLisp: Vec<AST> = <a:FuncDef+> => a;
+
+pub FuncDef: AST = {
+    "(" "FN" <name:Ident> "(" <args:Ident*> ")" <body: FuncBodyParser*> ")" => AST::FuncDef(name, args, body)
+}
+
+pub FuncBodyParser: AST = {
+    "(" "LET" <name:Ident> <val:Expression> ")" => AST::VarDecl(name, val),
+    SetParser => <>,
+    "(" "RET" <e:Expression> ")" => AST::Return(e),
+    "(" "RET" ")" => AST::ReturnVoid,
+    "(" <e:Expression> ")" => AST::Expr(e),
+    "(" "IF" "(" <e:Expression> ")" <body:FuncBodyParser*> ")" => AST::If(e, body),
+}
+
+SetParser: AST = {
+    "(" "SET" <name:Ident> <val:Expression> ")" => AST::VarAssign(name, val),
+    "(" "SET" "#" <arr:Ident> <pos:Expression> <val:Expression> ")" => AST::ArrayAssign(arr, pos, val)
+}
+
+pub Expression: Expr = {
+    <op:Operator> <lhs:BoxxedExpression> <rhs:BoxxedExpression> => Expr::BiOp(lhs, op, rhs),
+    "(" <expr:Expression> ")"                                   => expr,
+    Number                                                      => Expr::Literal(Object::Integer(<>)),
+    StrLit                                                      => Expr::Literal(Object::String(<>)),
+    ArrayLit                                                    => Expr::Literal(Object::List(<>)),
+    Ident                                                       => Expr::Var(<>),
+    "$" <fn_name:Ident> "(" <exprs:Expression*> ")"              => Expr::FuncCall(fn_name, exprs),
+    "#" <arr:Expression> <pos:Expression>                       => Expr::ArrayAccess(Box::new(arr), Box::new(pos))
+}
+
+Operator: BinOp = {
+    "+" => BinOp::Add,
+    "-" => BinOp::Sub,
+    "*" => BinOp::Mul,
+    "/" => BinOp::Div,
+    ">" => BinOp::Gt,
+    "<" => BinOp::Lt,
+    "=" => BinOp::Eq,
+    "!=" => BinOp::Neq,
+    "%" => BinOp::Mod,
+}
+
+pub BoxxedExpression: Box<Expr> = Expression => Box::new(<>);
+
+pub Number: i32   = <n:r"[0-9]+">                 => n.to_string().parse().unwrap();
+pub Ident: String = <n:r"[_a-zA-Z][_a-zA-Z0-9]*"> => n.to_string()                 ;
+pub StrLit: String = <s:r#"".*""#> => { let mut n = s.to_string(); n.remove(0); n.remove(n.len()-1); n };
+ArrayLit: Vec<Expr> = "#(" <n:CommaSeperated*> ")" => n;
+CommaSeperated: Expr = <e:Expression> ","? => e;
